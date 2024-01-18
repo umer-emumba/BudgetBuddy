@@ -1,0 +1,14 @@
+.env
+go.sum
+/static
+/templates
+/vendor
+/bin
+.vscode/
+.idea/
+
+# Ignore binary files
+*.exe
+*.dll
+*.so
+*.dylib
