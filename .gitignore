@@ -1,11 +1,13 @@
 .env
 go.sum
 /static
+/public
 /templates
 /vendor
 /bin
 .vscode/
 .idea/
+/tmp
 
 # Ignore binary files
 *.exe
