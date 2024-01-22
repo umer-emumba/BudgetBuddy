@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	config "github.com/umer-emumba/BudgetBuddy/configs"
+	"github.com/umer-emumba/BudgetBuddy/config"
 	"github.com/umer-emumba/BudgetBuddy/models"
 	"github.com/umer-emumba/BudgetBuddy/routes"
 )
@@ -23,6 +23,9 @@ func main() {
 	router.Static("/public", "./public")
 	routes.SetupRoutes(router)
 
+	//setup asynq server
+	routes.SetupAsynqServeMux()
+
 	// Start the server
 	serverAddr := fmt.Sprintf(":%d", config.AppCfg.Port)
 
@@ -32,4 +35,5 @@ func main() {
 	} else {
 		log.Printf("Server is running on http://localhost%s", serverAddr)
 	}
+
 }

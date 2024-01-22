@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
-	config "github.com/umer-emumba/BudgetBuddy/configs"
+	"github.com/umer-emumba/BudgetBuddy/config"
 	"github.com/umer-emumba/BudgetBuddy/types"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
@@ -81,11 +81,24 @@ func (helper *Helper) SendMail(options types.MailOptions) error {
 	d := gomail.NewDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password)
 
 	if err := d.DialAndSend(m); err != nil {
-		fmt.Println(smtp.Host, smtp.Port, smtp.User, smtp.Password)
+
 		fmt.Println("Failed to send email:", err)
 		return err
 	}
 
 	fmt.Println("Email sent successfully")
 	return nil
+}
+
+func (helper *Helper) CreateVerificationToken(id int) (string, error) {
+	claims := types.JwtToken{
+		Id:        id,
+		UserType:  types.User,
+		TokenType: types.EmailVerification,
+	}
+	token, tokenErr := helper.CreateToken(claims)
+	if tokenErr != nil {
+		return "", tokenErr
+	}
+	return token, nil
 }

@@ -22,10 +22,15 @@ type SMTPConfig struct {
 	Sender   string
 }
 
+type RedisConfig struct {
+	Host string
+}
+
 type AppConfig struct {
 	Port        int
 	FrontendUrl string
 	DatabaseConfig
 	JWTConfig
 	SMTPConfig
+	RedisConfig
 }

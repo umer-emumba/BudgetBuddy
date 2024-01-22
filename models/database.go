@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	config "github.com/umer-emumba/BudgetBuddy/configs"
+	"github.com/umer-emumba/BudgetBuddy/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
