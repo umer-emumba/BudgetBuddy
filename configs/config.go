@@ -6,38 +6,10 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
+	"github.com/umer-emumba/BudgetBuddy/types"
 )
 
-type DatabaseConfig struct {
-	Host     string
-	User     string
-	Password string
-	Port     int
-	Database string
-}
-
-type JWTConfig struct {
-	Secret             string
-	AccessTokenExpiry  int
-	RefreshTokenExpiry int
-}
-
-type SMTPConfig struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-}
-
-type AppConfig struct {
-	Port        int
-	FrontendUrl string
-	DatabaseConfig
-	JWTConfig
-	SMTPConfig
-}
-
-var AppCfg *AppConfig
+var AppCfg *types.AppConfig
 
 func LoadConfig() {
 	err := godotenv.Load()
@@ -50,26 +22,27 @@ func LoadConfig() {
 	accessTokenExpiry, _ := strconv.Atoi(os.Getenv("JWT_ACCESS_EXPIRY"))
 	refreshTokenExpiry, _ := strconv.Atoi(os.Getenv("JWT_REFRESH_EXPIRY"))
 
-	AppCfg = &AppConfig{
+	AppCfg = &types.AppConfig{
 		Port:        port,
 		FrontendUrl: os.Getenv("FRONTEND_URL"),
-		DatabaseConfig: DatabaseConfig{
+		DatabaseConfig: types.DatabaseConfig{
 			Host:     os.Getenv("DB_HOST"),
 			User:     os.Getenv("DB_USER"),
 			Password: os.Getenv("DB_PASSWORD"),
 			Port:     dbPort,
 			Database: os.Getenv("DB_DATABASE"),
 		},
-		JWTConfig: JWTConfig{
+		JWTConfig: types.JWTConfig{
 			Secret:             os.Getenv("JWT_SECRET"),
 			AccessTokenExpiry:  accessTokenExpiry,
 			RefreshTokenExpiry: refreshTokenExpiry,
 		},
-		SMTPConfig: SMTPConfig{
+		SMTPConfig: types.SMTPConfig{
 			Host:     os.Getenv("SMTP_HOST"),
-			User:     os.Getenv("SMTP_USER"),
+			User:     os.Getenv("SMTP_USERNAME"),
 			Password: os.Getenv("SMTP_PASSWORD"),
 			Port:     smtpPort,
+			Sender:   os.Getenv("SMTP_SENDER"),
 		},
 	}
 }

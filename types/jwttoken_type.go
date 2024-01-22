@@ -1,5 +1,7 @@
 package types
 
+import "github.com/golang-jwt/jwt/v5"
+
 type TokenType string
 
 const (
@@ -14,3 +16,10 @@ type UserType string
 const (
 	User UserType = "user"
 )
+
+type JwtToken struct {
+	Id int
+	TokenType
+	UserType
+	jwt.RegisteredClaims
+}

@@ -2,9 +2,12 @@ package services
 
 import (
 	"errors"
+	"fmt"
 
+	config "github.com/umer-emumba/BudgetBuddy/configs"
 	"github.com/umer-emumba/BudgetBuddy/models"
 	"github.com/umer-emumba/BudgetBuddy/repositories"
+	"github.com/umer-emumba/BudgetBuddy/types"
 	"github.com/umer-emumba/BudgetBuddy/types/dtos"
 	"github.com/umer-emumba/BudgetBuddy/utils"
 )
@@ -17,6 +20,7 @@ type AuthService struct {
 func NewAuthService() AuthService {
 	return AuthService{
 		userRepository: repositories.NewUserRepository(),
+		helper:         utils.NewHelper(),
 	}
 }
 
@@ -40,6 +44,24 @@ func (service AuthService) SignUp(dto dtos.SignupDto) (interface{}, error) {
 	if createUserError != nil {
 		return nil, createUserError
 	}
+
+	claims := types.JwtToken{
+		Id:        int(user.ID),
+		UserType:  types.User,
+		TokenType: types.EmailVerification,
+	}
+	token, tokenErr := service.helper.CreateToken(claims)
+	if tokenErr != nil {
+		return nil, tokenErr
+	}
+
+	mailOptions := types.MailOptions{
+		To:      dto.Email,
+		Subject: "Account Verification",
+		Body:    fmt.Sprintf("Please click on following link to activate your account <a href='%s?%s'>Activate Account</a>", config.AppCfg.FrontendUrl, token),
+	}
+
+	service.helper.SendMail(mailOptions)
 
 	return map[string]string{
 		"message": "Account created successfully",

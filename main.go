@@ -20,8 +20,8 @@ func main() {
 	router := gin.Default()
 
 	// Setup routes
-	routes.SetupRoutes(router)
 	router.Static("/public", "./public")
+	routes.SetupRoutes(router)
 
 	// Start the server
 	serverAddr := fmt.Sprintf(":%d", config.AppCfg.Port)
