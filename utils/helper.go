@@ -68,7 +68,7 @@ func ConstructValidationError(err error) string {
 	return errorMessage
 }
 
-func (helper *Helper) SendMail(options types.MailOptions) error {
+func (helper *Helper) SendMail(options types.MailOptions) {
 
 	smtp := helper.appConfig.SMTPConfig
 
@@ -81,11 +81,10 @@ func (helper *Helper) SendMail(options types.MailOptions) error {
 	d := gomail.NewDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password)
 
 	if err := d.DialAndSend(m); err != nil {
-		fmt.Println(smtp.Host, smtp.Port, smtp.User, smtp.Password)
 		fmt.Println("Failed to send email:", err)
-		return err
+
 	}
 
 	fmt.Println("Email sent successfully")
-	return nil
+
 }

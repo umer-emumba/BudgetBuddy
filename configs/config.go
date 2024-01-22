@@ -44,5 +44,8 @@ func LoadConfig() {
 			Port:     smtpPort,
 			Sender:   os.Getenv("SMTP_SENDER"),
 		},
+		RedistConfig: types.RedistConfig{
+			Host: os.Getenv("REDIS_HOST"),
+		},
 	}
 }

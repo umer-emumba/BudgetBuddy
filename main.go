@@ -14,6 +14,7 @@ func main() {
 
 	//initliaze config and database
 	config.LoadConfig()
+	config.ConnectRMQ()
 	models.InitDB()
 
 	// Initialize Gin router
