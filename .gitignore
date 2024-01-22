@@ -8,6 +8,7 @@ go.sum
 .vscode/
 .idea/
 /tmp
+/logs
 
 # Ignore binary files
 *.exe

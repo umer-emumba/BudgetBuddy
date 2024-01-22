@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/umer-emumba/BudgetBuddy/config"
+	"github.com/umer-emumba/BudgetBuddy/middleware"
 	"github.com/umer-emumba/BudgetBuddy/models"
 	"github.com/umer-emumba/BudgetBuddy/routes"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -15,9 +17,12 @@ func main() {
 	//initliaze config and database
 	config.LoadConfig()
 	models.InitDB()
+	config.InitLogger()
 
 	// Initialize Gin router
 	router := gin.Default()
+
+	router.Use(middleware.GinZapLogger(config.Logger, time.RFC3339, true))
 
 	// Setup routes
 	router.Static("/public", "./public")
@@ -31,9 +36,9 @@ func main() {
 
 	err := router.Run(serverAddr)
 	if err != nil {
-		log.Fatal("Failed to start the server: ", err)
+		config.Logger.Fatal("Failed to start the server: ", zap.Error(err))
 	} else {
-		log.Printf("Server is running on http://localhost%s", serverAddr)
+		config.Logger.Info("Server is running on http://localhost%s", zap.String("message", serverAddr))
 	}
 
 }
