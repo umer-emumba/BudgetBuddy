@@ -114,6 +114,10 @@ func (service AuthService) SignIn(dto dtos.SignInDto) (types.Login, error) {
 		return login, errors.New("invalid credentials")
 	}
 
+	if user.EmailVerifiedAt.IsZero() {
+		return login, errors.New("please verify your account first")
+	}
+
 	accessToken, accessTokenErr := service.helper.CreateAccessToken(int(user.ID))
 	if accessTokenErr != nil {
 		return login, accessTokenErr
