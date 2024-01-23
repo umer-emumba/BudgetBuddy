@@ -34,5 +34,16 @@ func GinZapLogger(logger *zap.Logger, timeFormat string, utc bool) gin.HandlerFu
 			zap.String("ip", clientIP),
 			zap.Duration("latency", latency),
 		)
+
+		// Check if an error occurred during processing the request
+		if len(c.Errors) > 0 {
+			for _, err := range c.Errors {
+				logger.Error("Request failed",
+					zap.String("method", c.Request.Method),
+					zap.String("path", c.Request.URL.Path),
+					zap.Error(err),
+				)
+			}
+		}
 	}
 }

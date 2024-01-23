@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/umer-emumba/BudgetBuddy/config"
 	"github.com/umer-emumba/BudgetBuddy/models"
@@ -38,7 +39,7 @@ func (service AuthService) SignUp(dto dtos.SignupDto) (types.Message, error) {
 	if err != nil {
 		return msg, err
 	}
-	user := models.User{
+	user := &models.User{
 		Email:    dto.Email,
 		Password: dto.Password,
 	}
@@ -71,5 +72,33 @@ func (service AuthService) SignUp(dto dtos.SignupDto) (types.Message, error) {
 	log.Printf("enqueued task: id=%s queue=%s", info.ID, info.Queue)
 
 	msg.Message = "Account Created Successfully"
+	return msg, nil
+}
+
+func (service AuthService) VerifyAccount(dto dtos.AccountVerificationDto) (types.Message, error) {
+	msg := types.Message{}
+	claims, jwtErr := service.helper.VerifyToken(dto.Token)
+	if jwtErr != nil {
+		return msg, jwtErr
+	}
+
+	if claims.UserType != types.User {
+		return msg, errors.New("invalid token")
+	}
+	if claims.TokenType != types.EmailVerification {
+		return msg, errors.New("invalid token")
+	}
+
+	user, userErr := service.userRepository.GetUserByID(uint(claims.Id))
+	if userErr != nil {
+		return msg, userErr
+	}
+	user.EmailVerifiedAt = time.Now()
+	saveErr := service.userRepository.SaveUser(user)
+	if saveErr != nil {
+		return msg, saveErr
+	}
+
+	msg.Message = "Account Verified Successfully"
 	return msg, nil
 }

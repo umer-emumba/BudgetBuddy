@@ -10,6 +10,7 @@ func setupAuthRoutes(router *gin.Engine) {
 	authRoutes := router.Group("/api/auth")
 	{
 		authRoutes.POST("/signup", handler.SignUp)
+		authRoutes.POST("/verify", handler.VerifyAccount)
 	}
 
 }

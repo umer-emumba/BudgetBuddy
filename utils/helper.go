@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
-	"os"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
@@ -26,23 +26,30 @@ func NewHelper() *Helper {
 
 func (helper *Helper) CreateToken(claims types.JwtToken) (string, error) {
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	return accessToken.SignedString([]byte(os.Getenv("TOKEN_SECRET")))
+	secretKey := []byte(helper.appConfig.JWTConfig.Secret)
+	return accessToken.SignedString(secretKey)
 }
 
-func (helper *Helper) VerifyToken(tokenString string) (jwt.MapClaims, error) {
+func (helper *Helper) VerifyToken(tokenString string) (*types.JwtToken, error) {
+	secretKey := []byte(helper.appConfig.JWTConfig.Secret)
+	var jwtClaims types.JwtToken
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return helper.appConfig.JWTConfig.Secret, nil
+	token, err := jwt.ParseWithClaims(tokenString, &types.JwtToken{}, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
 	})
 	if err != nil {
-		return nil, err
+
+		return &jwtClaims, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+	if !token.Valid {
+		return &jwtClaims, errors.New("token is not valid")
+	}
+
+	if claims, ok := token.Claims.(*types.JwtToken); ok {
 		return claims, nil
 	} else {
-		return nil, err
+		return &jwtClaims, err
 	}
 }
 
