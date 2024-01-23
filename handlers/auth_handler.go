@@ -67,3 +67,14 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 	}
 	utils.SuccessResponse(c, http.StatusOK, data)
 }
+
+func (h *AuthHandler) GetProfile(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, user)
+
+}

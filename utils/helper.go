@@ -113,7 +113,8 @@ func (helper *Helper) CreateVerificationToken(id int) (string, error) {
 
 func (helper *Helper) CreateAccessToken(id int) (string, error) {
 	expiryDuration := time.Duration(helper.appConfig.JWTConfig.AccessTokenExpiry)
-	expirationTime := time.Now().Add(expiryDuration)
+	expirationTime := time.Now().Add(expiryDuration * time.Second)
+	fmt.Println(expirationTime)
 	claims := types.JwtToken{
 		Id:        id,
 		UserType:  types.User,
@@ -131,7 +132,7 @@ func (helper *Helper) CreateAccessToken(id int) (string, error) {
 
 func (helper *Helper) CreateRefreshToken(id int) (string, error) {
 	expiryDuration := time.Duration(helper.appConfig.JWTConfig.RefreshTokenExpiry)
-	expirationTime := time.Now().Add(expiryDuration)
+	expirationTime := time.Now().Add(expiryDuration * time.Second)
 	claims := types.JwtToken{
 		Id:        id,
 		UserType:  types.User,
