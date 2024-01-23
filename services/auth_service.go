@@ -134,3 +134,27 @@ func (service AuthService) SignIn(dto dtos.SignInDto) (types.Login, error) {
 	return login, nil
 
 }
+
+func (service AuthService) UpdateProfile(user *models.User, dto dtos.UpdateProfileDTO) (types.Message, error) {
+	msg := types.Message{}
+
+	if dto.Image != nil {
+		isValidImage := service.helper.IsImage(dto.Image)
+		if !isValidImage {
+			return msg, errors.New("image should be a valid image")
+		}
+		imageUrl, uploadErr := service.helper.UploadFile(dto.Image, "uploads")
+		if uploadErr != nil {
+			return msg, uploadErr
+		}
+
+		user.ImageUrl = imageUrl
+	}
+
+	user.Name = dto.Name
+	service.userRepository.SaveUser(user)
+	msg.Message = "Profile Updated"
+
+	return msg, nil
+
+}

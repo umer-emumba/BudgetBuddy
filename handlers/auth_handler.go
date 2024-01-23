@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/umer-emumba/BudgetBuddy/models"
 	"github.com/umer-emumba/BudgetBuddy/services"
 	"github.com/umer-emumba/BudgetBuddy/types/dtos"
 	"github.com/umer-emumba/BudgetBuddy/utils"
@@ -76,5 +78,35 @@ func (h *AuthHandler) GetProfile(c *gin.Context) {
 	}
 
 	utils.SuccessResponse(c, http.StatusOK, user)
+
+}
+
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+	var dto dtos.UpdateProfileDTO
+
+	usr, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	user, ok := usr.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	if err := c.ShouldBindWith(&dto, binding.FormMultipart); err != nil {
+		message := utils.ConstructValidationError(err)
+		utils.ErrorResponse(c, http.StatusBadRequest, message)
+		return
+	}
+
+	data, error := h.authService.UpdateProfile(user, dto)
+	if error != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, error.Error())
+		return
+	}
+	utils.SuccessResponse(c, http.StatusOK, data)
 
 }

@@ -3,6 +3,10 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"io"
+	"mime/multipart"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -146,4 +150,72 @@ func (helper *Helper) CreateRefreshToken(id int) (string, error) {
 		return "", tokenErr
 	}
 	return token, nil
+}
+
+func (helper *Helper) IsImage(file *multipart.FileHeader) bool {
+
+	if file.Size == 0 {
+		return false
+	}
+
+	// Check if the file type is allowed (you can customize this based on your requirements)
+	allowedTypes := []string{"image/jpeg", "image/png", "image/gif"}
+	validImage := false
+	for _, allowedType := range allowedTypes {
+		if file.Header.Get("Content-Type") == allowedType {
+			validImage = true
+			break
+		}
+	}
+
+	return validImage
+}
+
+func (helper *Helper) UploadFile(file *multipart.FileHeader, destinationDir string) (string, error) {
+	fmt.Println(file.Header.Get("Content-Type"))
+	// Ensure the destination directory exists
+	if err := os.MkdirAll("public/"+destinationDir, 0755); err != nil {
+		return "", err
+	}
+
+	// Generate a unique filename using a timestamp and the original filename
+	uniqueFilename := generateUniqueFilename(file.Filename)
+
+	// Create the destination file
+	destinationPath := filepath.Join(destinationDir, uniqueFilename)
+	newFile, err := os.Create("public/" + destinationPath)
+	if err != nil {
+		return "", err
+	}
+	defer newFile.Close()
+
+	// Open the uploaded file
+	uploadedFile, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer uploadedFile.Close()
+
+	// Copy the contents of the uploaded file to the new file
+	_, err = io.Copy(newFile, uploadedFile)
+	if err != nil {
+		return "", err
+	}
+
+	return destinationPath, nil
+}
+
+func generateUniqueFilename(originalFilename string) string {
+	// Use the current timestamp to generate a unique part of the filename
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+
+	// Combine the timestamp and file extension to create a unique filename
+	uniquePart := fmt.Sprintf("%d", timestamp)
+
+	// Combine the unique part and the original filename
+	uniqueFilename := fmt.Sprintf("%s_%s", uniquePart, originalFilename)
+
+	// Replace any spaces with underscores in the filename
+	uniqueFilename = filepath.Join(filepath.SplitList(uniqueFilename)...)
+	return uniqueFilename
 }

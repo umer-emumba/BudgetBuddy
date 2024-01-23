@@ -14,6 +14,7 @@ func setupAuthRoutes(router *gin.Engine) {
 		authRoutes.POST("/verify", handler.VerifyAccount)
 		authRoutes.POST("/signin", handler.SignIn)
 		authRoutes.GET("/profile", middleware.AuthMiddleware(), handler.GetProfile)
+		authRoutes.PUT("/update_profile", middleware.AuthMiddleware(), handler.UpdateProfile)
 	}
 
 }
