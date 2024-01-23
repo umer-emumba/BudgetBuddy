@@ -102,3 +102,31 @@ func (service AuthService) VerifyAccount(dto dtos.AccountVerificationDto) (types
 	msg.Message = "Account Verified Successfully"
 	return msg, nil
 }
+
+func (service AuthService) SignIn(dto dtos.SignInDto) (types.Login, error) {
+	login := types.Login{}
+	user := service.userRepository.GetUserByEmail(dto.Email)
+	if user.ID == 0 {
+		return login, errors.New("invalid credentials")
+	}
+	passwordVerification := service.helper.VerifyPassword(user.Password, dto.Password)
+	if !passwordVerification {
+		return login, errors.New("invalid credentials")
+	}
+
+	accessToken, accessTokenErr := service.helper.CreateAccessToken(int(user.ID))
+	if accessTokenErr != nil {
+		return login, accessTokenErr
+	}
+
+	refreshToken, refreshTokenErr := service.helper.CreateRefreshToken(int(user.ID))
+	if refreshTokenErr != nil {
+		return login, refreshTokenErr
+	}
+
+	login.AccessToken = accessToken
+	login.RefreshToken = refreshToken
+
+	return login, nil
+
+}

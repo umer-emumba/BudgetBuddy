@@ -11,6 +11,7 @@ func setupAuthRoutes(router *gin.Engine) {
 	{
 		authRoutes.POST("/signup", handler.SignUp)
 		authRoutes.POST("/verify", handler.VerifyAccount)
+		authRoutes.POST("/signin", handler.SignIn)
 	}
 
 }

@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
@@ -25,9 +26,9 @@ func NewHelper() *Helper {
 }
 
 func (helper *Helper) CreateToken(claims types.JwtToken) (string, error) {
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	secretKey := []byte(helper.appConfig.JWTConfig.Secret)
-	return accessToken.SignedString(secretKey)
+	return token.SignedString(secretKey)
 }
 
 func (helper *Helper) VerifyToken(tokenString string) (*types.JwtToken, error) {
@@ -102,6 +103,42 @@ func (helper *Helper) CreateVerificationToken(id int) (string, error) {
 		Id:        id,
 		UserType:  types.User,
 		TokenType: types.EmailVerification,
+	}
+	token, tokenErr := helper.CreateToken(claims)
+	if tokenErr != nil {
+		return "", tokenErr
+	}
+	return token, nil
+}
+
+func (helper *Helper) CreateAccessToken(id int) (string, error) {
+	expiryDuration := time.Duration(helper.appConfig.JWTConfig.AccessTokenExpiry)
+	expirationTime := time.Now().Add(expiryDuration)
+	claims := types.JwtToken{
+		Id:        id,
+		UserType:  types.User,
+		TokenType: types.Access,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+	token, tokenErr := helper.CreateToken(claims)
+	if tokenErr != nil {
+		return "", tokenErr
+	}
+	return token, nil
+}
+
+func (helper *Helper) CreateRefreshToken(id int) (string, error) {
+	expiryDuration := time.Duration(helper.appConfig.JWTConfig.RefreshTokenExpiry)
+	expirationTime := time.Now().Add(expiryDuration)
+	claims := types.JwtToken{
+		Id:        id,
+		UserType:  types.User,
+		TokenType: types.Refresh,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
 	}
 	token, tokenErr := helper.CreateToken(claims)
 	if tokenErr != nil {

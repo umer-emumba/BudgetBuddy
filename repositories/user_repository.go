@@ -8,7 +8,7 @@ import (
 type UserRepository interface {
 	CreateUser(user *models.User) error
 	GetUserByID(userID uint) (*models.User, error)
-	GetUserByEmail(email string) (*models.User, error)
+	GetUserByEmail(email string) *models.User
 	GetAllUsers() ([]models.User, error)
 	CountByEmail(email string) (int64, error)
 	SaveUser(user *models.User) error
@@ -32,10 +32,10 @@ func (r *userRepository) GetUserByID(userID uint) (*models.User, error) {
 	return &user, err
 }
 
-func (r *userRepository) GetUserByEmail(email string) (*models.User, error) {
+func (r *userRepository) GetUserByEmail(email string) *models.User {
 	var user models.User
-	err := r.db.First(&user, email).Error
-	return &user, err
+	r.db.Where("email = ?", email).First(&user)
+	return &user
 }
 
 func (r *userRepository) CountByEmail(email string) (int64, error) {

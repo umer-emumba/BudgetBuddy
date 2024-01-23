@@ -50,3 +50,20 @@ func (h *AuthHandler) VerifyAccount(c *gin.Context) {
 	}
 	utils.SuccessResponse(c, http.StatusOK, data)
 }
+
+func (h *AuthHandler) SignIn(c *gin.Context) {
+	var dto dtos.SignInDto
+
+	if err := c.ShouldBind(&dto); err != nil {
+		message := utils.ConstructValidationError(err)
+		utils.ErrorResponse(c, http.StatusBadRequest, message)
+		return
+	}
+
+	data, error := h.authService.SignIn(dto)
+	if error != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, error.Error())
+		return
+	}
+	utils.SuccessResponse(c, http.StatusOK, data)
+}
