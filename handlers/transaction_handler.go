@@ -81,3 +81,34 @@ func (h TransactionHandler) GetCategories(c *gin.Context) {
 
 	utils.SuccessResponse(c, http.StatusOK, data)
 }
+
+func (h TransactionHandler) GetTransactions(c *gin.Context) {
+	var dto dtos.PaginationDto
+
+	if err := c.ShouldBindQuery(&dto); err != nil {
+		message := utils.ConstructValidationError(err)
+		utils.ErrorResponse(c, http.StatusBadRequest, message)
+		return
+	}
+
+	usr, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	user, ok := usr.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	data, err := h.service.GetTransactions(user, dto)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, data)
+
+}

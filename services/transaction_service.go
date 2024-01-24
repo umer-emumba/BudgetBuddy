@@ -52,3 +52,22 @@ func (service TransactionService) GetTransactionTypes() ([]*models.TransactionTy
 func (service TransactionService) GetCategories(transactionTypeId int) ([]*models.Category, error) {
 	return service.repo.GetCategories(transactionTypeId)
 }
+
+func (service TransactionService) GetTransactions(user *models.User, dto dtos.PaginationDto) (types.Pagination[*models.Transaction], error) {
+	var pagination types.Pagination[*models.Transaction]
+	count, countErr := service.repo.Count(user.ID, dto)
+	if countErr != nil {
+		return pagination, countErr
+	}
+
+	rows, rowsErr := service.repo.FindAll(user.ID, dto)
+	if rowsErr != nil {
+		return pagination, rowsErr
+	}
+
+	pagination.Count = count
+	pagination.Rows = rows
+
+	return pagination, nil
+
+}
