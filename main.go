@@ -25,7 +25,7 @@ func main() {
 	router.Use(middleware.GinZapLogger(config.Logger, time.RFC3339, true))
 
 	// Setup routes
-	router.Static("/public", "./public")
+	router.Static("/uploads", "./public/uploads")
 	routes.SetupRoutes(router)
 
 	//setup asynq server
