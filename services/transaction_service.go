@@ -89,3 +89,19 @@ func (service TransactionService) UpdateTransaction(user *models.User, ID int, d
 	msg.Message = "Transaction updated successfully"
 	return msg, nil
 }
+
+func (service TransactionService) DeleteTransaction(user *models.User, ID int) (types.Message, error) {
+	msg := types.Message{}
+
+	_, err := service.repo.FindOne(user.ID, ID)
+	if err != nil {
+		return msg, err
+	}
+
+	deleteErr := service.repo.DeleteTransaction(user.ID, ID)
+	if deleteErr != nil {
+		return msg, deleteErr
+	}
+	msg.Message = "Transaction deleted successfully"
+	return msg, nil
+}

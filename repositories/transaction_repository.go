@@ -15,6 +15,7 @@ type TransactionRepository interface {
 	FindAll(userID uint, dto dtos.PaginationDto) ([]*models.Transaction, error)
 	FindDetails(userID uint, ID int) (*models.Transaction, error)
 	FindOne(userID uint, ID int) (*models.Transaction, error)
+	DeleteTransaction(userID uint, ID int) error
 }
 
 type transactionRepository struct {
@@ -81,4 +82,8 @@ func (r *transactionRepository) FindDetails(userID uint, ID int) (*models.Transa
 
 func (r *transactionRepository) UpdateTransaction(ID int, dto dtos.UpdateTransactionDto) error {
 	return r.db.Model(&models.Transaction{}).Where("id = ?", ID).Updates(dto).Error
+}
+
+func (r *transactionRepository) DeleteTransaction(userID uint, ID int) error {
+	return r.db.Where("user_id = ?", userID).Where("id = ?", ID).Delete(&models.Transaction{}).Error
 }

@@ -16,4 +16,5 @@ func setupTransactionRoutes(router *gin.Engine) {
 	tranRoutes.GET("/categories/:transaction_type_id", middleware.AuthMiddleware(), handler.GetCategories)
 	tranRoutes.GET("/:id", middleware.AuthMiddleware(), handler.GetTransactionDetails)
 	tranRoutes.PUT("/:id", middleware.AuthMiddleware(), handler.UpdateTransaction)
+	tranRoutes.DELETE("/:id", middleware.AuthMiddleware(), handler.DeleteTransaction)
 }

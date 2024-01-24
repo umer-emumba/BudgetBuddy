@@ -190,3 +190,38 @@ func (h TransactionHandler) UpdateTransaction(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, data)
 
 }
+
+func (h TransactionHandler) DeleteTransaction(c *gin.Context) {
+	transactionId := c.Param("id")
+	if transactionId == "" {
+		utils.ErrorResponse(c, http.StatusBadRequest, "id is required")
+		return
+	}
+
+	ID, convErr := strconv.Atoi(transactionId)
+	if convErr != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, convErr.Error())
+		return
+	}
+
+	usr, exists := c.Get("user")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	user, ok := usr.(*models.User)
+	if !ok {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	data, err := h.service.DeleteTransaction(user, ID)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, data)
+
+}
