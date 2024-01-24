@@ -152,6 +152,24 @@ func (helper *Helper) CreateRefreshToken(id int) (string, error) {
 	return token, nil
 }
 
+func (helper *Helper) CreatePasswordResetToken(id int) (string, error) {
+	expiryDuration := time.Duration(helper.appConfig.JWTConfig.AccessTokenExpiry)
+	expirationTime := time.Now().Add(expiryDuration * time.Second)
+	claims := types.JwtToken{
+		Id:        id,
+		UserType:  types.User,
+		TokenType: types.PasswordReset,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+	token, tokenErr := helper.CreateToken(claims)
+	if tokenErr != nil {
+		return "", tokenErr
+	}
+	return token, nil
+}
+
 func (helper *Helper) IsImage(file *multipart.FileHeader) bool {
 
 	if file.Size == 0 {

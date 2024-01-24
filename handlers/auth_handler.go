@@ -110,3 +110,36 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, data)
 
 }
+
+func (h *AuthHandler) ForgotPassword(c *gin.Context) {
+	email := c.Param("email")
+	if email == "" {
+		utils.ErrorResponse(c, http.StatusBadRequest, "email is required")
+		return
+	}
+	data, err := h.authService.ForgotPassword(email)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	utils.SuccessResponse(c, http.StatusOK, data)
+
+}
+
+func (h *AuthHandler) ResetPassword(c *gin.Context) {
+	var dto dtos.PasswordResetDto
+
+	if err := c.ShouldBind(&dto); err != nil {
+		message := utils.ConstructValidationError(err)
+		utils.ErrorResponse(c, http.StatusBadRequest, message)
+		return
+	}
+
+	data, err := h.authService.ResetPassword(dto)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	utils.SuccessResponse(c, http.StatusOK, data)
+
+}

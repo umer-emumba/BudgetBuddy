@@ -158,3 +158,71 @@ func (service AuthService) UpdateProfile(user *models.User, dto dtos.UpdateProfi
 	return msg, nil
 
 }
+
+func (service AuthService) ForgotPassword(email string) (types.Message, error) {
+	msg := types.Message{}
+
+	user := service.userRepository.GetUserByEmail(email)
+	if user.ID == 0 {
+		return msg, errors.New("account does not exist with this email")
+	}
+
+	token, tokenErr := service.helper.CreatePasswordResetToken(int(user.ID))
+	if tokenErr != nil {
+		return msg, tokenErr
+	}
+
+	mailOptions := types.MailOptions{
+		To:      email,
+		Subject: "Forgot Password",
+		Body:    fmt.Sprintf("Please click on following link to reset your account Password <a href='%s?%s'>Reset Password</a>", config.AppCfg.FrontendUrl, token),
+	}
+
+	client := config.CreateAsynqClient()
+	defer client.Close()
+	task, err := utils.NewEmailDeliveryTask(mailOptions)
+	if err != nil {
+		log.Fatalf("could not create task: %v", err)
+	}
+	info, err := client.Enqueue(task)
+	if err != nil {
+		log.Fatalf("could not enqueue task: %v", err)
+	}
+	log.Printf("enqueued task: id=%s queue=%s", info.ID, info.Queue)
+
+	msg.Message = "Password reset link has been sent to your email"
+	return msg, nil
+}
+
+func (service AuthService) ResetPassword(dto dtos.PasswordResetDto) (types.Message, error) {
+	msg := types.Message{}
+	claims, jwtErr := service.helper.VerifyToken(dto.Token)
+	if jwtErr != nil {
+		return msg, jwtErr
+	}
+
+	if claims.UserType != types.User {
+		return msg, errors.New("invalid token")
+	}
+	if claims.TokenType != types.PasswordReset {
+		return msg, errors.New("invalid token")
+	}
+
+	user, userErr := service.userRepository.GetUserByID(uint(claims.Id))
+	if userErr != nil {
+		return msg, userErr
+	}
+
+	password, hashErr := service.helper.CreateHash(dto.Password)
+	if hashErr != nil {
+		return msg, hashErr
+	}
+	user.Password = password
+	saveErr := service.userRepository.SaveUser(user)
+	if saveErr != nil {
+		return msg, saveErr
+	}
+
+	msg.Message = "Password Reset Successfully"
+	return msg, nil
+}
