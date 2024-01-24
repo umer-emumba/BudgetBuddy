@@ -52,3 +52,26 @@ func (h ReportHandler) GetReportByInterval(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, data)
 
 }
+
+func (h ReportHandler) GetReportByCategory(c *gin.Context) {
+	usr, exists := c.Get("user")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	user, ok := usr.(*models.User)
+	if !ok {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	data, err := h.service.GetReportByCategory(user)
+
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, data)
+}

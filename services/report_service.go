@@ -22,3 +22,7 @@ func NewReportService() ReportService {
 func (service ReportService) GetReportByInterval(user *models.User, interval string) ([]*types.IntervalReport, error) {
 	return service.repo.GetReportByInterval(user.ID, interval)
 }
+
+func (service ReportService) GetReportByCategory(user *models.User) ([]*types.CategoryReport, error) {
+	return service.repo.GetReportByCategory(user.ID)
+}

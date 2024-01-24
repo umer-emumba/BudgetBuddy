@@ -18,6 +18,7 @@ type TransactionRepository interface {
 	FindOne(userID uint, ID int) (*models.Transaction, error)
 	DeleteTransaction(userID uint, ID int) error
 	GetReportByInterval(userID uint, interval string) ([]*types.IntervalReport, error)
+	GetReportByCategory(userID uint) ([]*types.CategoryReport, error)
 }
 
 type transactionRepository struct {
@@ -108,6 +109,20 @@ func (r *transactionRepository) GetReportByInterval(userID uint, interval string
 			Group("`interval`, transaction_type").
 			Scan(&result).Error
 	}
+
+	return result, err
+}
+
+func (r *transactionRepository) GetReportByCategory(userID uint) ([]*types.CategoryReport, error) {
+	var result []*types.CategoryReport
+
+	err := r.db.Model(&models.Transaction{}).
+		Select(" Category.name as category, TransactionType.name as transaction_type, SUM(amount) as total_amount").
+		Joins("TransactionType").
+		Joins("Category").
+		Where("user_id=?", userID).
+		Group("`category`, transaction_type").
+		Scan(&result).Error
 
 	return result, err
 }

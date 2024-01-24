@@ -11,4 +11,5 @@ func setupReportRoutes(router *gin.Engine) {
 	reportRoutes := router.Group("/api/reports")
 
 	reportRoutes.GET("/by_interval/:interval", middleware.AuthMiddleware(), handler.GetReportByInterval)
+	reportRoutes.GET("/by_category", middleware.AuthMiddleware(), handler.GetReportByCategory)
 }
