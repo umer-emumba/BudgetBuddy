@@ -6,5 +6,5 @@ import (
 
 type TransactionType struct {
 	gorm.Model
-	Name string `gorm:"size:255"`
+	Name string `gorm:"size:255" json:"name"`
 }
