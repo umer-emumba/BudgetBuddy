@@ -5,7 +5,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/umer-emumba/BudgetBuddy/models"
 	"github.com/umer-emumba/BudgetBuddy/services"
+	"github.com/umer-emumba/BudgetBuddy/types/dtos"
 	"github.com/umer-emumba/BudgetBuddy/utils"
 )
 
@@ -20,7 +22,33 @@ func NewTransactionHandler() TransactionHandler {
 }
 
 func (h TransactionHandler) AddTransaction(c *gin.Context) {
+	var dto dtos.CreateTransactionDto
 
+	if err := c.ShouldBind(&dto); err != nil {
+		message := utils.ConstructValidationError(err)
+		utils.ErrorResponse(c, http.StatusBadRequest, message)
+		return
+	}
+
+	usr, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	user, ok := usr.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	data, err := h.service.AddTransaction(user, dto)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, data)
 }
 
 func (h TransactionHandler) GetTransactionTypes(c *gin.Context) {

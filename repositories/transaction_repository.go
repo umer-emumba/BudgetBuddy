@@ -20,7 +20,7 @@ func NewTransactionRepository() TransactionRepository {
 }
 
 func (r *transactionRepository) CreateTransaction(transaction *models.Transaction) error {
-	return nil
+	return r.db.Create(transaction).Error
 }
 
 func (r *transactionRepository) GetTransactionTypes() ([]*models.TransactionType, error) {
