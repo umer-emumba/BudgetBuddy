@@ -12,6 +12,7 @@ type TransactionRepository interface {
 	GetCategories(transactionTypeId int) ([]*models.Category, error)
 	Count(userID uint, dto dtos.PaginationDto) (int, error)
 	FindAll(userID uint, dto dtos.PaginationDto) ([]*models.Transaction, error)
+	FindDetails(userID uint, ID int) (*models.Transaction, error)
 }
 
 type transactionRepository struct {
@@ -62,4 +63,10 @@ func (r *transactionRepository) FindAll(userID uint, dto dtos.PaginationDto) ([]
 	err := query.Find(&transactions).Error
 	return transactions, err
 
+}
+
+func (r *transactionRepository) FindDetails(userID uint, ID int) (*models.Transaction, error) {
+	var trans models.Transaction
+	err := r.db.Joins("TransactionType").Joins("Category").Where("transactions.user_id =?", userID).Where("transactions.id=?", ID).First(&trans).Error
+	return &trans, err
 }

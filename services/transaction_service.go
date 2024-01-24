@@ -71,3 +71,7 @@ func (service TransactionService) GetTransactions(user *models.User, dto dtos.Pa
 	return pagination, nil
 
 }
+
+func (service TransactionService) GetTransactionDetails(user *models.User, ID int) (*models.Transaction, error) {
+	return service.repo.FindDetails(user.ID, ID)
+}

@@ -14,4 +14,5 @@ func setupTransactionRoutes(router *gin.Engine) {
 	tranRoutes.GET("/", middleware.AuthMiddleware(), handler.GetTransactions)
 	tranRoutes.GET("/transaction_types", middleware.AuthMiddleware(), handler.GetTransactionTypes)
 	tranRoutes.GET("/categories/:transaction_type_id", middleware.AuthMiddleware(), handler.GetCategories)
+	tranRoutes.GET("/:id", middleware.AuthMiddleware(), handler.GetTransactionDetails)
 }
