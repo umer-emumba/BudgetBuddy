@@ -8,11 +8,13 @@ import (
 
 type TransactionRepository interface {
 	CreateTransaction(transaction *models.Transaction) error
+	UpdateTransaction(ID int, dto dtos.UpdateTransactionDto) error
 	GetTransactionTypes() ([]*models.TransactionType, error)
 	GetCategories(transactionTypeId int) ([]*models.Category, error)
 	Count(userID uint, dto dtos.PaginationDto) (int, error)
 	FindAll(userID uint, dto dtos.PaginationDto) ([]*models.Transaction, error)
 	FindDetails(userID uint, ID int) (*models.Transaction, error)
+	FindOne(userID uint, ID int) (*models.Transaction, error)
 }
 
 type transactionRepository struct {
@@ -65,8 +67,18 @@ func (r *transactionRepository) FindAll(userID uint, dto dtos.PaginationDto) ([]
 
 }
 
+func (r *transactionRepository) FindOne(userID uint, ID int) (*models.Transaction, error) {
+	var trans models.Transaction
+	err := r.db.Where("transactions.user_id =?", userID).Where("transactions.id=?", ID).First(&trans).Error
+	return &trans, err
+}
+
 func (r *transactionRepository) FindDetails(userID uint, ID int) (*models.Transaction, error) {
 	var trans models.Transaction
 	err := r.db.Joins("TransactionType").Joins("Category").Where("transactions.user_id =?", userID).Where("transactions.id=?", ID).First(&trans).Error
 	return &trans, err
+}
+
+func (r *transactionRepository) UpdateTransaction(ID int, dto dtos.UpdateTransactionDto) error {
+	return r.db.Model(&models.Transaction{}).Where("id = ?", ID).Updates(dto).Error
 }

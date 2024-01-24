@@ -75,3 +75,17 @@ func (service TransactionService) GetTransactions(user *models.User, dto dtos.Pa
 func (service TransactionService) GetTransactionDetails(user *models.User, ID int) (*models.Transaction, error) {
 	return service.repo.FindDetails(user.ID, ID)
 }
+
+func (service TransactionService) UpdateTransaction(user *models.User, ID int, dto dtos.UpdateTransactionDto) (types.Message, error) {
+	msg := types.Message{}
+	_, err := service.repo.FindOne(user.ID, ID)
+	if err != nil {
+		return msg, err
+	}
+
+	if updateErr := service.repo.UpdateTransaction(ID, dto); updateErr != nil {
+		return msg, updateErr
+	}
+	msg.Message = "Transaction updated successfully"
+	return msg, nil
+}

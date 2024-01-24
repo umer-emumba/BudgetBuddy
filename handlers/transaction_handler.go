@@ -32,13 +32,13 @@ func (h TransactionHandler) AddTransaction(c *gin.Context) {
 
 	usr, exists := c.Get("user")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	user, ok := usr.(*models.User)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
@@ -93,13 +93,13 @@ func (h TransactionHandler) GetTransactions(c *gin.Context) {
 
 	usr, exists := c.Get("user")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	user, ok := usr.(*models.User)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
@@ -128,17 +128,60 @@ func (h TransactionHandler) GetTransactionDetails(c *gin.Context) {
 
 	usr, exists := c.Get("user")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	user, ok := usr.(*models.User)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	data, err := h.service.GetTransactionDetails(user, ID)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, data)
+
+}
+
+func (h TransactionHandler) UpdateTransaction(c *gin.Context) {
+	var dto dtos.UpdateTransactionDto
+
+	transactionId := c.Param("id")
+	if transactionId == "" {
+		utils.ErrorResponse(c, http.StatusBadRequest, "id is required")
+		return
+	}
+
+	ID, convErr := strconv.Atoi(transactionId)
+	if convErr != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, convErr.Error())
+		return
+	}
+
+	if err := c.ShouldBind(&dto); err != nil {
+		message := utils.ConstructValidationError(err)
+		utils.ErrorResponse(c, http.StatusBadRequest, message)
+		return
+	}
+
+	usr, exists := c.Get("user")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	user, ok := usr.(*models.User)
+	if !ok {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	data, err := h.service.UpdateTransaction(user, ID, dto)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
