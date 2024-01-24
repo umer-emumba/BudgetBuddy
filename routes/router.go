@@ -14,6 +14,7 @@ import (
 func SetupRoutes(router *gin.Engine) {
 	setupAuthRoutes(router)
 	setupTransactionRoutes(router)
+	setupReportRoutes(router)
 	router.NoRoute(func(c *gin.Context) {
 		utils.ErrorResponse(c, 404, "Requested resource not found")
 	})

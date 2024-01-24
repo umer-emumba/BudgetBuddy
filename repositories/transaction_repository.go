@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"github.com/umer-emumba/BudgetBuddy/models"
+	"github.com/umer-emumba/BudgetBuddy/types"
 	"github.com/umer-emumba/BudgetBuddy/types/dtos"
 	"gorm.io/gorm"
 )
@@ -16,6 +17,7 @@ type TransactionRepository interface {
 	FindDetails(userID uint, ID int) (*models.Transaction, error)
 	FindOne(userID uint, ID int) (*models.Transaction, error)
 	DeleteTransaction(userID uint, ID int) error
+	GetReportByInterval(userID uint, interval string) ([]*types.IntervalReport, error)
 }
 
 type transactionRepository struct {
@@ -86,4 +88,26 @@ func (r *transactionRepository) UpdateTransaction(ID int, dto dtos.UpdateTransac
 
 func (r *transactionRepository) DeleteTransaction(userID uint, ID int) error {
 	return r.db.Where("user_id = ?", userID).Where("id = ?", ID).Delete(&models.Transaction{}).Error
+}
+
+func (r *transactionRepository) GetReportByInterval(userID uint, interval string) ([]*types.IntervalReport, error) {
+	var result []*types.IntervalReport
+	var err error
+	if interval == "monthly" {
+		err = r.db.Model(&models.Transaction{}).
+			Select("CONCAT(MONTHNAME(transaction_date), ' ', YEAR(transaction_date)) AS `interval`, TransactionType.name as transaction_type, SUM(amount) as total_amount").
+			Joins("TransactionType").
+			Where("user_id=?", userID).
+			Group("`interval`, transaction_type").
+			Scan(&result).Error
+	} else {
+		err = r.db.Model(&models.Transaction{}).
+			Select("YEAR(transaction_date) AS `interval`, TransactionType.name as transaction_type, SUM(amount) as total_amount").
+			Joins("TransactionType").
+			Where("user_id=?", userID).
+			Group("`interval`, transaction_type").
+			Scan(&result).Error
+	}
+
+	return result, err
 }
