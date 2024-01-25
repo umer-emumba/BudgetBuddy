@@ -81,6 +81,7 @@ func ConstructValidationError(err error) string {
 		}
 		return errorMessage
 	} else {
+		config.Logger.Error(err.Error())
 		return "Request data binding failed"
 	}
 }
