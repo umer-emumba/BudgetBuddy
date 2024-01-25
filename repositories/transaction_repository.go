@@ -19,6 +19,7 @@ type TransactionRepository interface {
 	DeleteTransaction(userID uint, ID int) error
 	GetReportByInterval(userID uint, interval string) ([]*types.IntervalReport, error)
 	GetReportByCategory(userID uint) ([]*types.CategoryReport, error)
+	MonthlyReport(userID uint) ([]types.MonthlyReport, error)
 }
 
 type transactionRepository struct {
@@ -122,6 +123,22 @@ func (r *transactionRepository) GetReportByCategory(userID uint) ([]*types.Categ
 		Joins("Category").
 		Where("user_id=?", userID).
 		Group("`category`, transaction_type").
+		Scan(&result).Error
+
+	return result, err
+}
+
+func (r *transactionRepository) MonthlyReport(userID uint) ([]types.MonthlyReport, error) {
+	var result []types.MonthlyReport
+
+	err := r.db.Model(&models.Transaction{}).
+		Select("TransactionType.name as transaction_type, SUM(amount) as total_amount").
+		Joins("TransactionType").
+		Joins("Category").
+		Where("user_id=?", userID).
+		Where("YEAR(transaction_date) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)").
+		Where("MONTH(transaction_date) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)").
+		Group("transaction_type").
 		Scan(&result).Error
 
 	return result, err

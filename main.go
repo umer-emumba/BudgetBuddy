@@ -9,6 +9,7 @@ import (
 	"github.com/umer-emumba/BudgetBuddy/middleware"
 	"github.com/umer-emumba/BudgetBuddy/models"
 	"github.com/umer-emumba/BudgetBuddy/routes"
+	"github.com/umer-emumba/BudgetBuddy/utils"
 	"go.uber.org/zap"
 )
 
@@ -21,6 +22,8 @@ func main() {
 
 	// Initialize Gin router
 	router := gin.Default()
+
+	utils.StartCronJob()
 
 	router.Use(middleware.GinZapLogger(config.Logger, time.RFC3339, true))
 

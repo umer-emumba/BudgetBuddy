@@ -9,7 +9,7 @@ type UserRepository interface {
 	CreateUser(user *models.User) error
 	GetUserByID(userID uint) (*models.User, error)
 	GetUserByEmail(email string) *models.User
-	GetAllUsers() ([]models.User, error)
+	GetAllUsers() ([]*models.User, error)
 	CountByEmail(email string) (int64, error)
 	SaveUser(user *models.User) error
 }
@@ -44,8 +44,8 @@ func (r *userRepository) CountByEmail(email string) (int64, error) {
 	return count, err
 }
 
-func (r *userRepository) GetAllUsers() ([]models.User, error) {
-	var users []models.User
+func (r *userRepository) GetAllUsers() ([]*models.User, error) {
+	var users []*models.User
 	err := r.db.Find(&users).Error
 	return users, err
 }
