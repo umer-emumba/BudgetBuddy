@@ -72,12 +72,17 @@ func (helper *Helper) VerifyPassword(hashedPassword, inputPassword string) bool 
 }
 
 func ConstructValidationError(err error) string {
-	errorMessage := ""
-	for _, err := range err.(validator.ValidationErrors) {
 
-		errorMessage += fmt.Sprintf("Rule '%s' failed for field '%s' , ", err.ActualTag(), err.Field())
+	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+		errorMessage := ""
+
+		for _, validationErr := range validationErrors {
+			errorMessage += fmt.Sprintf("Rule '%s' failed for field '%s' , ", validationErr.ActualTag(), validationErr.Field())
+		}
+		return errorMessage
+	} else {
+		return "Request data binding failed"
 	}
-	return errorMessage
 }
 
 func (helper *Helper) SendMail(options types.MailOptions) error {
